@@ -1,0 +1,340 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Will you be my girlfriend?</title>
+  <style>
+    /* Reset */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body,#app{height:100%}
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(ellipse at bottom, #02132b 0%, #000814 60%);
+      color:#fff;overflow:hidden;
+    }/* Stars */
+.stars{position:fixed;inset:0;pointer-events:none}
+.star{position:absolute;background:rgba(255,255,255,0.9);border-radius:50%;opacity:0.9;animation:twinkle 6s infinite;filter:drop-shadow(0 0 6px rgba(255,255,255,0.15))}
+@keyframes twinkle{0%{opacity:0.2}50%{opacity:1}100%{opacity:0.2}}
+
+/* Heart trail */
+.heart{position:fixed;pointer-events:none;width:18px;height:18px;transform:translate(-50%,-50%) rotate(45deg);background:linear-gradient(135deg,#ff6b9a,#ff3d7f);opacity:0.95;border-radius:3px;}
+.heart:before,.heart:after{content:'';position:absolute;width:18px;height:18px;background:inherit;border-radius:50%}
+.heart:before{top:-9px;left:0}
+.heart:after{left:9px;top:0}
+
+/* Container pages */
+.page{position:absolute;inset:0;padding:40px;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .6s, transform .6s;}
+.hidden{opacity:0;pointer-events:none;transform:translateY(20px)}
+
+/* Card */
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03));backdrop-filter: blur(6px);border-radius:14px;padding:28px;max-width:860px;width:92%;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+
+h1.big{font-size:48px;letter-spacing:1px;margin-bottom:16px}
+p.lead{font-size:18px;color:rgba(255,255,255,0.85);margin-bottom:24px}
+
+.btn-row{display:flex;gap:16px;justify-content:center}
+.btn{padding:12px 20px;border-radius:10px;border:0;cursor:pointer;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,0.5)}
+.btn-primary{background:#ff5a92;color:white}
+.btn-ghost{background:transparent;border:2px solid rgba(255,255,255,0.15);color:#fff}
+
+/* Moving "Don't love you" */
+#noBtn{position:relative}
+
+/* Letter page */
+.letter-area{display:flex;gap:18px;align-items:flex-start}
+textarea{width:100%;min-height:120px;border-radius:10px;padding:14px;border:2px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.25);color:#fff;font-size:15px}
+.field{flex:1;display:flex;flex-direction:column}
+label{font-size:13px;margin-bottom:8px;color:rgba(255,255,255,0.8)}
+.small{font-size:13px;color:rgba(255,255,255,0.7);margin-top:8px}
+
+/* Letter animation (folding) */
+.letter-wrap{width:100%;max-width:740px;margin:0 auto;transform-origin:center;transition:transform .8s ease,opacity .6s}
+.letter-closed{transform:perspective(800px) rotateX(80deg) translateY(40px);opacity:0}
+
+/* Fingerprint page */
+.fingerprint{width:180px;height:180px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#0b1630,#081225);box-shadow:inset 0 8px 24px rgba(255,255,255,0.02),0 8px 30px rgba(0,0,0,0.6);cursor:pointer}
+.fp-lines{width:140px;height:140px}
+.fp-text{margin-bottom:20px;font-weight:600}
+
+/* Hearts shower */
+.burst{position:fixed;left:0;right:0;bottom:0;top:0;pointer-events:none;overflow:hidden}
+.burst .bheart{position:absolute;width:14px;height:14px;transform:rotate(45deg);background:linear-gradient(135deg,#ff6b9a,#ff3d7f);border-radius:3px}
+
+/* small responsiveness */
+@media (max-width:520px){h1.big{font-size:34px}}
+
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  <div id="app"><!-- PAGE 1: Ask -->
+<section id="page1" class="page">
+  <div class="card">
+    <h1 class="big">I love you</h1>
+    <p class="lead">Aku harap kamu mau jadi lebih dari teman — jawab jujur ya :)</p>
+    <div class="btn-row">
+      <button id="yesBtn" class="btn btn-primary">I love you too</button>
+      <button id="noBtn" class="btn btn-ghost">Don't love you</button>
+    </div>
+    <p class="small" style="margin-top:14px">(Coba sentuh tombol <em>Don't love you</em> kalau berani)</p>
+  </div>
+</section>
+
+<!-- PAGE 2: Letter -->
+<section id="page2" class="page hidden">
+  <div class="card letter-wrap" id="letterWrap">
+    <h2 style="font-size:28px;margin-bottom:8px">Tulis surat cintamu</h2>
+    <p class="small">Isi jawabanmu pada dua kolom di bawah: <strong>5 alasan mau sama aku</strong> dan <strong>3 kalimat buat aku</strong>.</p>
+
+    <div style="margin-top:18px" class="letter-area">
+      <div class="field">
+        <label for="alasan">Sebutkan 5 alasan mau sama aku (pisahkan baris)</label>
+        <textarea id="alasan" placeholder="1. ...\n2. ...\n3. ...\n4. ...\n5. ..."></textarea>
+      </div>
+      <div class="field">
+        <label for="kalimat">Tulis 3 kalimat buat aku (pisahkan baris)</label>
+        <textarea id="kalimat" placeholder="Kalimat 1\nKalimat 2\nKalimat 3"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:18px">
+      <button id="closeLetter" class="btn btn-ghost" disabled>Close (anim)</button>
+      <button id="sendLetter" class="btn btn-primary" disabled>Send</button>
+    </div>
+    <p class="small" style="margin-top:10px">Surat akan dikirim ke: <strong>muhammadzulfanirawanmahendra@gmail.com</strong></p>
+  </div>
+</section>
+
+<!-- PAGE 3: Fingerprint -->
+<section id="page3" class="page hidden">
+  <div class="card" style="display:flex;flex-direction:column;align-items:center;">
+    <p class="fp-text">13 Agustus kamu jadi milik aku, scan sidik jari kamu agar menjadi bukti kamu dengan aku</p>
+    <div id="fpBtn" class="fingerprint" title="Tap to scan">
+      <!-- simple fingerprint svg -->
+      <svg class="fp-lines" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <g stroke-width="2" stroke="#8fbfff" fill="none">
+          <path d="M50 10 C65 10 80 25 80 40 C80 60 60 75 50 80"/>
+          <path d="M40 20 C35 24 30 32 30 44 C30 60 42 72 50 76"/>
+          <path d="M60 20 C65 24 70 32 70 44 C70 60 58 72 50 76"/>
+          <path d="M50 30 C54 33 57 40 57 48 C57 62 52 70 50 72"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+  </div>  <!-- Hearts burst container -->  <div class="burst" id="burst"></div>  <script>
+    // ---------- Stars generation ----------
+    const starsEl = document.getElementById('stars');
+    const STAR_COUNT = 100;
+    for(let i=0;i<STAR_COUNT;i++){
+      const s = document.createElement('div');
+      s.className='star';
+      const size = Math.random()*2.6 + 0.6;
+      s.style.width = size+'px'; s.style.height = size+'px';
+      s.style.left = Math.random()*100 + '%';
+      s.style.top = Math.random()*100 + '%';
+      s.style.opacity = (Math.random()*0.9 + 0.2).toFixed(2);
+      s.style.animationDuration = (Math.random()*6 + 3)+'s';
+      starsEl.appendChild(s);
+    }
+
+    // ---------- Heart trail on cursor ----------
+    let lastHeart = 0;
+    function createHeart(x,y){
+      const el = document.createElement('div');
+      el.className='heart';
+      el.style.left = x+'px'; el.style.top = y+'px';
+      document.body.appendChild(el);
+      // animate fade & float
+      const dist = 30 + Math.random()*40;
+      const dur = 1000 + Math.random()*500;
+      el.animate([
+        {transform:el.style.transform, opacity:1, offset:0},
+        {transform:`translate(-50%,-50%) translateY(-${dist}px) rotate(45deg) scale(0.6)`, opacity:0},
+      ],{duration:dur, easing:'cubic-bezier(.2,.8,.2,1)'});
+      setTimeout(()=>el.remove(), dur);
+    }
+    window.addEventListener('mousemove',(e)=>{
+      const now = Date.now();
+      if(now - lastHeart > 80){createHeart(e.clientX,e.clientY); lastHeart = now}
+    });
+
+    // ---------- Page controls ----------
+    const page1 = document.getElementById('page1');
+    const page2 = document.getElementById('page2');
+    const page3 = document.getElementById('page3');
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+
+    // Move-away behavior for "Don't love you"
+    let dodgeCount = 0; // counts how many times it was attempted
+    const MAX_ATTEMPTS = 6; // after attempts, hide the button
+
+    function randomizeNoPosition(){
+      // place the button at a random offset within card
+      const cardRect = noBtn.parentElement.getBoundingClientRect();
+      const maxX = cardRect.width - noBtn.offsetWidth - 8;
+      const maxY = cardRect.height - noBtn.offsetHeight - 8;
+      const x = Math.random()*maxX; const y = Math.random()*maxY;
+      noBtn.style.transform = `translate(${x}px, ${y}px)`;
+    }
+
+    // on hover or mousemove near button, dodge
+    noBtn.addEventListener('mouseenter', ()=>{
+      dodgeCount++;
+      if(dodgeCount >= MAX_ATTEMPTS){
+        // disappear permanently with cute animation
+        noBtn.animate([{opacity:1, transform:'scale(1)'},{opacity:0, transform:'scale(.2)'}],{duration:500}).onfinish = ()=>{
+          noBtn.style.display='none';
+        };
+        return;
+      }
+      // small chance to teleport far away
+      randomizeNoPosition();
+    });
+
+    // also dodge on click attempt
+    noBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      dodgeCount++;
+      if(dodgeCount >= MAX_ATTEMPTS){
+        noBtn.style.display='none';
+        return;
+      }
+      randomizeNoPosition();
+    });
+
+    // When yes is clicked -> go to page 2
+    yesBtn.addEventListener('click', ()=>{
+      showPage(2);
+    });
+
+    function showPage(n){
+      page1.classList.add('hidden'); page2.classList.add('hidden'); page3.classList.add('hidden');
+      if(n===1){page1.classList.remove('hidden')}
+      if(n===2){page2.classList.remove('hidden')}
+      if(n===3){page3.classList.remove('hidden')}
+    }
+
+    // Initialize with page1 visible
+    showPage(1);
+
+    // ---------- Letter page logic ----------
+    const alasan = document.getElementById('alasan');
+    const kalimat = document.getElementById('kalimat');
+    const closeLetter = document.getElementById('closeLetter');
+    const sendLetter = document.getElementById('sendLetter');
+    const letterWrap = document.getElementById('letterWrap');
+
+    function checkLetterFilled(){
+      const alasanLines = alasan.value.split('\n').map(s=>s.trim()).filter(Boolean);
+      const kalimatLines = kalimat.value.split('\n').map(s=>s.trim()).filter(Boolean);
+      // require at least 5 alasan and 3 kalimat
+      const ok = alasanLines.length >= 5 && kalimatLines.length >= 3;
+      closeLetter.disabled = !ok;
+      sendLetter.disabled = !ok;
+      return ok;
+    }
+    alasan.addEventListener('input', checkLetterFilled);
+    kalimat.addEventListener('input', checkLetterFilled);
+
+    closeLetter.addEventListener('click', ()=>{
+      // animate letter closing
+      letterWrap.classList.add('letter-closed');
+      closeLetter.disabled = true; sendLetter.disabled = true;
+      // after close animation, bring back but blurred then enable send
+      setTimeout(()=>{
+        // unmount then mount to show folded state briefly
+        letterWrap.style.transition='transform .6s,opacity .6s';
+        letterWrap.classList.remove('letter-closed');
+        // briefly flash then enable send
+        sendLetter.disabled = false;
+      },900);
+    });
+
+    sendLetter.addEventListener('click', ()=>{
+      if(!checkLetterFilled()) return;
+      // prepare email via mailto as fallback
+      const to = 'muhammadzulfanirawanmahendra@gmail.com';
+      const subject = encodeURIComponent('Surat Cinta');
+      const bodyLines = [];
+      bodyLines.push('==== 5 Alasan ====');
+      bodyLines.push(alasan.value);
+      bodyLines.push('\n==== 3 Kalimat ====');
+      bodyLines.push(kalimat.value);
+      const body = encodeURIComponent(bodyLines.join('\n'));
+      // Try to open mail client by mailto
+      const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
+      // open mail client in new tab (browser will handle)
+      window.location.href = mailto;
+
+      // Also show simulated "sent" confirmation and continue to page 3 after small delay
+      // If the user completes sending outside, we still proceed.
+      setTimeout(()=>{
+        alert('Surat berhasil dikirim (jika mail client Anda terbuka). Lanjut ke pemindaian sidik jari.');
+        showPage(3);
+      },800);
+    });
+
+    // ---------- Fingerprint simulation ----------
+    const fpBtn = document.getElementById('fpBtn');
+    const burst = document.getElementById('burst');
+    fpBtn.addEventListener('click', ()=>{
+      // create a small loading ring inside fpBtn
+      const ring = document.createElement('div');
+      ring.style.position='absolute'; ring.style.width='160px'; ring.style.height='160px'; ring.style.borderRadius='50%';
+      ring.style.border='6px solid rgba(255,255,255,0.06)'; ring.style.boxSizing='border-box';
+      ring.style.display='flex'; ring.style.alignItems='center'; ring.style.justifyContent='center';
+      ring.style.backdropFilter='blur(2px)';
+      fpBtn.appendChild(ring);
+      let angle = 0;
+      const spin = setInterval(()=>{angle+=18; ring.style.transform = `rotate(${angle}deg)`},60);
+      // after loading, remove ring and show burst
+      setTimeout(()=>{
+        clearInterval(spin); ring.remove();
+        createHeartBurst();
+      },2000);
+    });
+
+    function createHeartBurst(){
+      const count = 28;
+      for(let i=0;i<count;i++){
+        const h = document.createElement('div');
+        h.className='bheart';
+        // random horizontal position near center
+        const left = 50 + (Math.random()*80 - 40);
+        h.style.left = left + '%';
+        const size = 8 + Math.random()*18; h.style.width = size+'px'; h.style.height = size+'px';
+        burst.appendChild(h);
+        // animate upward with random curve
+        const travel = 220 + Math.random()*160;
+        const duration = 1000 + Math.random()*1000;
+        const delay = Math.random()*200;
+        h.animate([
+          {transform:`translateY(0px) scale(1) rotate(${Math.random()*180}deg)`, opacity:1},
+          {transform:`translateY(-${travel}px) scale(.8) rotate(${Math.random()*720}deg)`, opacity:0}
+        ],{duration,delay,easing:'cubic-bezier(.2,.8,.2,1)'});
+        setTimeout(()=>h.remove(), 2000 + duration);
+      }
+      // quick little floating confetti hearts at bottom
+      for(let j=0;j<10;j++){
+        const hh = document.createElement('div'); hh.className='bheart';
+        hh.style.left = (10 + Math.random()*80) + '%'; hh.style.bottom = '0px';
+        const sz = 6 + Math.random()*10; hh.style.width = sz+'px'; hh.style.height = sz+'px';
+        burst.appendChild(hh);
+        const dur = 800 + Math.random()*900;
+        hh.animate([{transform:'translateY(0px)', opacity:1},{transform:`translateY(-${120+Math.random()*200}px)`, opacity:0}],{duration:dur,delay:100});
+        setTimeout(()=>hh.remove(), 1800 + dur);
+      }
+    }
+
+    // small friendly tip: reposition noBtn initially
+    window.addEventListener('load', ()=>randomizeNoPosition());
+
+    // Accessibility: allow Enter on yesBtn
+    yesBtn.addEventListener('keydown',(e)=>{if(e.key==='Enter') yesBtn.click()});
+  </script></body>
+</html>
